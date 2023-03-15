@@ -18,7 +18,7 @@ func CreatePatientWithMD(resolver graphql.FieldResolveFn) *graphql.Field {
 				Type: graphql.String,
 			},
 			"next_of_kins": &graphql.ArgumentConfig{
-				Type: graphql.NewList(pt_schemas.NextOfKinMetaInputType),
+				Type: graphql.NewList(person_schemas.NextOfKinMetaInputType),
 			},
 		},
 		Resolve: resolver,
@@ -36,7 +36,7 @@ func CreatePatient(resolver graphql.FieldResolveFn) *graphql.Field {
 				Type: person_schemas.ProfileInputType,
 			},
 			"next_of_kins": &graphql.ArgumentConfig{
-				Type: graphql.NewList(pt_schemas.NextOfKinInputType),
+				Type: graphql.NewList(person_schemas.NextOfKinInputType),
 			},
 		},
 		Resolve: resolver,
@@ -54,7 +54,7 @@ func UpdatePatientProfile(resolver graphql.FieldResolveFn) *graphql.Field {
 			"patient": &graphql.ArgumentConfig{
 				Type: pt_schemas.PatientInputType,
 			},
-			"person_id": &graphql.ArgumentConfig{
+			"person_xid": &graphql.ArgumentConfig{
 				Type: graphql.String,
 			},
 			"profile": &graphql.ArgumentConfig{

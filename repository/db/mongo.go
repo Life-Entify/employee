@@ -117,7 +117,7 @@ func (db *MongoDB) FindPatientById(ctx context.Context, id primitive.ObjectID) (
 	common.ToJSONStruct(result, &newPatient)
 	return &newPatient, nil
 }
-func (db *MongoDB) FindPatientsByPersonId(ctx context.Context, ids []string) ([]*patient.Patient, error) {
+func (db *MongoDB) FindPatientsByPersonId(ctx context.Context, ids []int64) ([]*patient.Patient, error) {
 	client, coll := db.Connect()
 	defer MongoDisconnect(client)
 	opts := options.Find().SetSort(bson.D{{Key: "person_id", Value: 1}})
