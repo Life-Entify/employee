@@ -6,6 +6,24 @@ import (
 	person_schemas "github.com/life-entify/person/v1/graph/schemas"
 )
 
+func CreatePatientWithNok(resolver graphql.FieldResolveFn) *graphql.Field {
+	return &graphql.Field{
+		Description: "Create Patient With Metadata",
+		Type:        pt_schemas.PatientType,
+		Args: graphql.FieldConfigArgument{
+			"oldId": &graphql.ArgumentConfig{
+				Type: graphql.String,
+			},
+			"profile": &graphql.ArgumentConfig{
+				Type: person_schemas.ProfileInputType,
+			},
+			"next_of_kins": &graphql.ArgumentConfig{
+				Type: graphql.NewList(person_schemas.NextOfKinMetaInputType),
+			},
+		},
+		Resolve: resolver,
+	}
+}
 func CreatePatientWithMD(resolver graphql.FieldResolveFn) *graphql.Field {
 	return &graphql.Field{
 		Description: "Create Patient With Metadata",
@@ -15,10 +33,28 @@ func CreatePatientWithMD(resolver graphql.FieldResolveFn) *graphql.Field {
 				Type: graphql.String,
 			},
 			"person_id": &graphql.ArgumentConfig{
-				Type: graphql.String,
+				Type: graphql.Int,
 			},
 			"next_of_kins": &graphql.ArgumentConfig{
 				Type: graphql.NewList(person_schemas.NextOfKinMetaInputType),
+			},
+		},
+		Resolve: resolver,
+	}
+}
+func CreatePatientWithPerson(resolver graphql.FieldResolveFn) *graphql.Field {
+	return &graphql.Field{
+		Description: "Create Patient",
+		Type:        pt_schemas.PatientType,
+		Args: graphql.FieldConfigArgument{
+			"oldId": &graphql.ArgumentConfig{
+				Type: graphql.String,
+			},
+			"person_id": &graphql.ArgumentConfig{
+				Type:  graphql.Int,
+			},
+			"next_of_kins": &graphql.ArgumentConfig{
+				Type: graphql.NewList(person_schemas.NextOfKinInputType),
 			},
 		},
 		Resolve: resolver,
