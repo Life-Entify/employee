@@ -11,7 +11,7 @@ func CreatePatientWithNok(resolver graphql.FieldResolveFn) *graphql.Field {
 		Description: "Create Patient With Metadata",
 		Type:        pt_schemas.PatientType,
 		Args: graphql.FieldConfigArgument{
-			"oldId": &graphql.ArgumentConfig{
+			"old_id": &graphql.ArgumentConfig{
 				Type: graphql.String,
 			},
 			"profile": &graphql.ArgumentConfig{
@@ -29,7 +29,7 @@ func CreatePatientWithMD(resolver graphql.FieldResolveFn) *graphql.Field {
 		Description: "Create Patient With Metadata",
 		Type:        pt_schemas.PatientType,
 		Args: graphql.FieldConfigArgument{
-			"oldId": &graphql.ArgumentConfig{
+			"old_id": &graphql.ArgumentConfig{
 				Type: graphql.String,
 			},
 			"person_id": &graphql.ArgumentConfig{
@@ -47,11 +47,11 @@ func CreatePatientWithPerson(resolver graphql.FieldResolveFn) *graphql.Field {
 		Description: "Create Patient",
 		Type:        pt_schemas.PatientType,
 		Args: graphql.FieldConfigArgument{
-			"oldId": &graphql.ArgumentConfig{
+			"old_id": &graphql.ArgumentConfig{
 				Type: graphql.String,
 			},
 			"person_id": &graphql.ArgumentConfig{
-				Type:  graphql.Int,
+				Type: graphql.Int,
 			},
 			"next_of_kins": &graphql.ArgumentConfig{
 				Type: graphql.NewList(person_schemas.NextOfKinInputType),
@@ -65,7 +65,7 @@ func CreatePatient(resolver graphql.FieldResolveFn) *graphql.Field {
 		Description: "Create Patient",
 		Type:        pt_schemas.PatientType,
 		Args: graphql.FieldConfigArgument{
-			"oldId": &graphql.ArgumentConfig{
+			"old_id": &graphql.ArgumentConfig{
 				Type: graphql.String,
 			},
 			"profile": &graphql.ArgumentConfig{

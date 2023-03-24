@@ -4,6 +4,7 @@ package v1;
 
 option go_package="./;patient";
 
+
 message Patient {
   string _id = 1;
   string old_id = 2;
