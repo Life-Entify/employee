@@ -1,19 +1,26 @@
-package patient
+package employee
 
 import (
 	"context"
 
-	db "github.com/life-entify/patient/repository/db"
-	"github.com/life-entify/patient/v1"
+	db "github.com/life-entify/employee/repository/db/mongo"
+	"github.com/life-entify/employee/v1"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
 type Repository interface {
-	Connect() (*mongo.Client, *mongo.Collection)
-	UpdatePatient(ctx context.Context, _id primitive.ObjectID, p *patient.Patient) (*mongo.UpdateResult, error)
-	CreatePatient(ctx context.Context, patient *patient.Patient) (*patient.Patient, error)
-	FindPatientById(ctx context.Context, id primitive.ObjectID) (*patient.Patient, error)
-	FindPatientsByPersonId(ctx context.Context, ids []int64) ([]*patient.Patient, error)
-	FindPatients(ctx context.Context, filterObj *patient.Patient, page *db.Pagination) ([]*patient.Patient, error)
+	ConnectDept() (*mongo.Client, *mongo.Collection)
+	ConnectEmp() (*mongo.Client, *mongo.Collection)
+
+	FindDepartmentById(ctx context.Context, id primitive.ObjectID) (*employee.Department, error)
+	FindDepartments(ctx context.Context, filterObj *employee.Department, page *db.Pagination) ([]*employee.Department, error)
+	UpdateDepartment(ctx context.Context, _id primitive.ObjectID, p *employee.Department) (*mongo.UpdateResult, error)
+	CreateDepartment(ctx context.Context, dept *employee.Department) (*employee.Department, error)
+
+	UpdateEmployee(ctx context.Context, _id primitive.ObjectID, p *employee.Employee) (*mongo.UpdateResult, error)
+	CreateEmployee(ctx context.Context, employee *employee.Employee) (*employee.Employee, error)
+	FindEmployeeById(ctx context.Context, id primitive.ObjectID) (*employee.Employee, error)
+	FindEmployeesByPersonId(ctx context.Context, ids []int64) ([]*employee.Employee, error)
+	FindEmployees(ctx context.Context, filterObj *employee.Employee, page *db.Pagination) ([]*employee.Employee, error)
 }

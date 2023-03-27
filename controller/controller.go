@@ -1,9 +1,9 @@
-package patient
+package employee
 
 import (
-	config "github.com/life-entify/patient/config"
-	repo "github.com/life-entify/patient/repository"
-	db "github.com/life-entify/patient/repository/db"
+	config "github.com/life-entify/employee/config"
+	repo "github.com/life-entify/employee/repository"
+	db "github.com/life-entify/employee/repository/db/mongo"
 )
 
 type Controller struct {

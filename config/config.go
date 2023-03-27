@@ -1,4 +1,4 @@
-package patient
+package employee
 
 type Config struct {
 	DatabaseType string

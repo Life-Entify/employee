@@ -1,13 +1,12 @@
-package patient
+package employee
 
 import (
 	"context"
 	"reflect"
 
-	common "github.com/life-entify/patient/common"
-	config "github.com/life-entify/patient/config"
-	"github.com/life-entify/patient/errors"
-	"github.com/life-entify/patient/v1"
+	common "github.com/life-entify/employee/common"
+	"github.com/life-entify/employee/errors"
+	"github.com/life-entify/employee/v1"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -15,22 +14,10 @@ import (
 )
 
 const (
-	COLLECTION = "patients"
+	COLLECTION = "employees"
 )
 
-type MongoDB struct {
-	uri      string
-	database string
-}
-
-func NewMongoDB(config config.IConfig) *MongoDB {
-	url := config.GetDBUrl()
-	return &MongoDB{
-		uri:      url,
-		database: config.GetDBName(),
-	}
-}
-func (db *MongoDB) Connect() (*mongo.Client, *mongo.Collection) {
+func (db *MongoDB) ConnectEmp() (*mongo.Client, *mongo.Collection) {
 	client, err := mongo.Connect(context.TODO(), options.Client().ApplyURI(db.uri))
 	if err != nil {
 		panic(err)
@@ -38,16 +25,12 @@ func (db *MongoDB) Connect() (*mongo.Client, *mongo.Collection) {
 	collection := client.Database(db.database).Collection(COLLECTION, &options.CollectionOptions{})
 	return client, collection
 }
-func MongoDisconnect(client *mongo.Client) {
-	if err := client.Disconnect(context.TODO()); err != nil {
-		panic(err)
-	}
-}
-func (db *MongoDB) GetNextPatientId(ctx context.Context) (int64, error) {
+
+func (db *MongoDB) GetNextEmployeeId(ctx context.Context) (int64, error) {
 	filter := bson.D{}
-	client, collection := db.Connect()
+	client, collection := db.ConnectEmp()
 	defer MongoDisconnect(client)
-	opts := options.Find().SetSort(bson.D{{Key: "patient_id", Value: -1}}).SetLimit(1)
+	opts := options.Find().SetSort(bson.D{{Key: "employee_id", Value: -1}}).SetLimit(1)
 	cursor, err := collection.Find(context.TODO(), filter, opts)
 	if err != nil {
 		return 0, err
@@ -57,15 +40,15 @@ func (db *MongoDB) GetNextPatientId(ctx context.Context) (int64, error) {
 		panic(err)
 	}
 	if len(results) > 0 {
-		var resultPatient patient.Patient
-		common.ToJSONStruct(results[0], &resultPatient)
-		return resultPatient.PatientId + 1, nil
+		var resultEmployee employee.Employee
+		common.ToJSONStruct(results[0], &resultEmployee)
+		return resultEmployee.EmployeeId + 1, nil
 	}
 	return 1, nil
 }
 
-func (db *MongoDB) UpdatePatient(ctx context.Context, _id primitive.ObjectID, p *patient.Patient) (*mongo.UpdateResult, error) {
-	client, coll := db.Connect()
+func (db *MongoDB) UpdateEmployee(ctx context.Context, _id primitive.ObjectID, p *employee.Employee) (*mongo.UpdateResult, error) {
+	client, coll := db.ConnectEmp()
 	defer MongoDisconnect(client)
 	var update bson.M
 	err := common.ToJSONStruct(p, &update)
@@ -78,20 +61,20 @@ func (db *MongoDB) UpdatePatient(ctx context.Context, _id primitive.ObjectID, p 
 	}
 	return value, nil
 }
-func (db *MongoDB) CreatePatient(ctx context.Context, pt *patient.Patient) (*patient.Patient, error) {
-	client, coll := db.Connect()
+func (db *MongoDB) CreateEmployee(ctx context.Context, pt *employee.Employee) (*employee.Employee, error) {
+	client, coll := db.ConnectEmp()
 	defer MongoDisconnect(client)
-	patientId, err := db.GetNextPatientId(ctx)
+	employeeId, err := db.GetNextEmployeeId(ctx)
 	if err != nil {
 		return nil, err
 	}
-	pt.PatientId = patientId
-	var jsonPatient interface{}
-	err = common.ToJSONStruct(pt, &jsonPatient)
+	pt.EmployeeId = employeeId
+	var jsonEmployee interface{}
+	err = common.ToJSONStruct(pt, &jsonEmployee)
 	if err != nil {
 		return nil, errors.Errorf(err.Error())
 	}
-	value, err := coll.InsertOne(ctx, &jsonPatient)
+	value, err := coll.InsertOne(ctx, &jsonEmployee)
 	if err != nil {
 		return nil, errors.Errorf(err.Error())
 	}
@@ -100,25 +83,25 @@ func (db *MongoDB) CreatePatient(ctx context.Context, pt *patient.Patient) (*pat
 	}
 	return pt, nil
 }
-func (db *MongoDB) FindPatientById(ctx context.Context, id primitive.ObjectID) (*patient.Patient, error) {
-	client, coll := db.Connect()
+func (db *MongoDB) FindEmployeeById(ctx context.Context, id primitive.ObjectID) (*employee.Employee, error) {
+	client, coll := db.ConnectEmp()
 	defer MongoDisconnect(client)
 	filter := bson.M{"_id": id}
 
 	var (
-		result     bson.M
-		newPatient patient.Patient
+		result      bson.M
+		newEmployee employee.Employee
 	)
 	err := coll.FindOne(ctx, filter).Decode(&result)
 	if err != nil {
 		return nil, err
 	}
 
-	common.ToJSONStruct(result, &newPatient)
-	return &newPatient, nil
+	common.ToJSONStruct(result, &newEmployee)
+	return &newEmployee, nil
 }
-func (db *MongoDB) FindPatientsByPersonId(ctx context.Context, ids []int64) ([]*patient.Patient, error) {
-	client, coll := db.Connect()
+func (db *MongoDB) FindEmployeesByPersonId(ctx context.Context, ids []int64) ([]*employee.Employee, error) {
+	client, coll := db.ConnectEmp()
 	defer MongoDisconnect(client)
 	opts := options.Find().SetSort(bson.D{{Key: "person_id", Value: 1}})
 	filter := bson.D{{Key: "person_id", Value: bson.D{{Key: "$in", Value: ids}}}}
@@ -132,16 +115,16 @@ func (db *MongoDB) FindPatientsByPersonId(ctx context.Context, ids []int64) ([]*
 	if err = cursor.All(context.TODO(), &results); err != nil {
 		return nil, errors.Errorf(err.Error())
 	}
-	var resultPatients []*patient.Patient
+	var resultEmployees []*employee.Employee
 	for _, pt := range results {
-		var resultPatient patient.Patient
-		common.ToJSONStruct(pt, &resultPatient)
-		resultPatients = append(resultPatients, &resultPatient)
+		var resultEmployee employee.Employee
+		common.ToJSONStruct(pt, &resultEmployee)
+		resultEmployees = append(resultEmployees, &resultEmployee)
 	}
-	return resultPatients, nil
+	return resultEmployees, nil
 }
-func (db *MongoDB) FindPatients(ctx context.Context, filterObj *patient.Patient, page *Pagination) ([]*patient.Patient, error) {
-	client, coll := db.Connect()
+func (db *MongoDB) FindEmployees(ctx context.Context, filterObj *employee.Employee, page *Pagination) ([]*employee.Employee, error) {
+	client, coll := db.ConnectEmp()
 	defer MongoDisconnect(client)
 	option := options.Find().SetSort(bson.D{{Key: "_id", Value: 1}})
 	if !reflect.ValueOf(page).IsZero() {
@@ -162,11 +145,9 @@ func (db *MongoDB) FindPatients(ctx context.Context, filterObj *patient.Patient,
 			}
 			filterItems = append(filterItems, bson.M{"_id": id})
 		}
-		if filterObj.OldId != "" {
-			filterItems = append(filterItems, bson.M{"old_id": filterObj.OldId})
-		}
-		if filterObj.PatientId != 0 {
-			filterItems = append(filterItems, bson.M{"patient_id": filterObj.PatientId})
+
+		if filterObj.EmployeeId != 0 {
+			filterItems = append(filterItems, bson.M{"employee_id": filterObj.EmployeeId})
 		}
 		if len(filterItems) > 0 {
 			filter["$or"] = filterItems
@@ -181,11 +162,11 @@ func (db *MongoDB) FindPatients(ctx context.Context, filterObj *patient.Patient,
 	if err = cursor.All(context.TODO(), &results); err != nil {
 		return nil, errors.Errorf(err.Error())
 	}
-	var resultPatients []*patient.Patient
+	var resultEmployees []*employee.Employee
 	for _, pt := range results {
-		var resultPatient patient.Patient
-		common.ToJSONStruct(pt, &resultPatient)
-		resultPatients = append(resultPatients, &resultPatient)
+		var resultEmployee employee.Employee
+		common.ToJSONStruct(pt, &resultEmployee)
+		resultEmployees = append(resultEmployees, &resultEmployee)
 	}
-	return resultPatients, nil
+	return resultEmployees, nil
 }

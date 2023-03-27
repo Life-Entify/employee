@@ -1,0 +1,19 @@
+syntax = "proto3";
+
+package v1;
+
+option go_package="./;employee";
+
+
+message Employee {
+  string _id = 1;
+  int64 employee_id = 2;
+  int64 person_id = 3;
+  repeated int64 department_ids = 4;
+}
+message Department {
+  string _id = 1;
+  string name = 2;
+  string description = 3;
+  string app = 4;
+}

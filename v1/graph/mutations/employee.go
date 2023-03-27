@@ -1,19 +1,16 @@
-package patient
+package employee
 
 import (
 	"github.com/graphql-go/graphql"
-	pt_schemas "github.com/life-entify/patient/v1/graph/schemas"
+	emp_schemas "github.com/life-entify/employee/v1/graph/schemas/employee"
 	person_schemas "github.com/life-entify/person/v1/graph/schemas"
 )
 
-func CreatePatientWithNok(resolver graphql.FieldResolveFn) *graphql.Field {
+func CreateEmployeeWithNok(resolver graphql.FieldResolveFn) *graphql.Field {
 	return &graphql.Field{
-		Description: "Create Patient With Metadata",
-		Type:        pt_schemas.PatientType,
+		Description: "Create Employee With Metadata",
+		Type:        emp_schemas.EmployeeType,
 		Args: graphql.FieldConfigArgument{
-			"old_id": &graphql.ArgumentConfig{
-				Type: graphql.String,
-			},
 			"profile": &graphql.ArgumentConfig{
 				Type: person_schemas.ProfileInputType,
 			},
@@ -24,14 +21,11 @@ func CreatePatientWithNok(resolver graphql.FieldResolveFn) *graphql.Field {
 		Resolve: resolver,
 	}
 }
-func CreatePatientWithMD(resolver graphql.FieldResolveFn) *graphql.Field {
+func CreateEmployeeWithMD(resolver graphql.FieldResolveFn) *graphql.Field {
 	return &graphql.Field{
-		Description: "Create Patient With Metadata",
-		Type:        pt_schemas.PatientType,
+		Description: "Create Employee With Metadata",
+		Type:        emp_schemas.EmployeeType,
 		Args: graphql.FieldConfigArgument{
-			"old_id": &graphql.ArgumentConfig{
-				Type: graphql.String,
-			},
 			"person_id": &graphql.ArgumentConfig{
 				Type: graphql.Int,
 			},
@@ -42,14 +36,11 @@ func CreatePatientWithMD(resolver graphql.FieldResolveFn) *graphql.Field {
 		Resolve: resolver,
 	}
 }
-func CreatePatientWithPerson(resolver graphql.FieldResolveFn) *graphql.Field {
+func CreateEmployeeWithPerson(resolver graphql.FieldResolveFn) *graphql.Field {
 	return &graphql.Field{
-		Description: "Create Patient",
-		Type:        pt_schemas.PatientType,
+		Description: "Create Employee",
+		Type:        emp_schemas.EmployeeType,
 		Args: graphql.FieldConfigArgument{
-			"old_id": &graphql.ArgumentConfig{
-				Type: graphql.String,
-			},
 			"person_id": &graphql.ArgumentConfig{
 				Type: graphql.Int,
 			},
@@ -60,14 +51,11 @@ func CreatePatientWithPerson(resolver graphql.FieldResolveFn) *graphql.Field {
 		Resolve: resolver,
 	}
 }
-func CreatePatient(resolver graphql.FieldResolveFn) *graphql.Field {
+func CreateEmployee(resolver graphql.FieldResolveFn) *graphql.Field {
 	return &graphql.Field{
-		Description: "Create Patient",
-		Type:        pt_schemas.PatientType,
+		Description: "Create Employee",
+		Type:        emp_schemas.EmployeeType,
 		Args: graphql.FieldConfigArgument{
-			"old_id": &graphql.ArgumentConfig{
-				Type: graphql.String,
-			},
 			"profile": &graphql.ArgumentConfig{
 				Type: person_schemas.ProfileInputType,
 			},
@@ -78,17 +66,16 @@ func CreatePatient(resolver graphql.FieldResolveFn) *graphql.Field {
 		Resolve: resolver,
 	}
 }
-func UpdatePatientProfile(resolver graphql.FieldResolveFn) *graphql.Field {
+func UpdateEmployeeProfile(resolver graphql.FieldResolveFn) *graphql.Field {
 	return &graphql.Field{
-		Description: "Update Patient",
-		Type:        pt_schemas.PatientType,
+		Description: "Update Employee",
+		Type:        emp_schemas.EmployeeType,
 		Args: graphql.FieldConfigArgument{
 			"_id": &graphql.ArgumentConfig{
 				Type: graphql.String,
 			},
-			//don't add profile or person details
-			"patient": &graphql.ArgumentConfig{
-				Type: pt_schemas.PatientInputType,
+			"employee": &graphql.ArgumentConfig{
+				Type: emp_schemas.EmployeeInputType,
 			},
 			"person_xid": &graphql.ArgumentConfig{
 				Type: graphql.String,

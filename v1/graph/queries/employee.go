@@ -1,22 +1,22 @@
-package patient
+package employee
 
 import (
 	"github.com/graphql-go/graphql"
-	pt_schemas "github.com/life-entify/patient/v1/graph/schemas"
+	emp_schemas "github.com/life-entify/employee/v1/graph/schemas/employee"
 	schemas "github.com/life-entify/person/v1/graph/schemas"
 )
 
-func GetPatients(resolver graphql.FieldResolveFn) *graphql.Field {
+func GetEmployees(resolver graphql.FieldResolveFn) *graphql.Field {
 	return &graphql.Field{
-		Description: "Get Patients",
-		Type:        graphql.NewList(pt_schemas.PatientType),
+		Description: "Get Employees",
+		Type:        graphql.NewList(emp_schemas.EmployeeType),
 		Args: graphql.FieldConfigArgument{
 			"keyword": &graphql.ArgumentConfig{
 				Type: graphql.NewInputObject(graphql.InputObjectConfig{
-					Name: "KeywordInputType",
+					Name: "EmpKeywordInputType",
 					Fields: graphql.InputObjectConfigFieldMap{
-						"patient": &graphql.InputObjectFieldConfig{
-							Type: pt_schemas.PatientKeywordInputType,
+						"employee": &graphql.InputObjectFieldConfig{
+							Type: emp_schemas.EmployeeKeywordInputType,
 						},
 						"person": &graphql.InputObjectFieldConfig{
 							Type: schemas.KeywordPersonInputType,
