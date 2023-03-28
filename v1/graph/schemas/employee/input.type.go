@@ -19,6 +19,20 @@ var EmployeeKeywordInputType = graphql.NewInputObject(graphql.InputObjectConfig{
 		},
 	},
 })
+var LoginInputType = graphql.NewInputObject(graphql.InputObjectConfig{
+	Name: "LoginInputType",
+	Fields: graphql.InputObjectConfigFieldMap{
+		"username": &graphql.InputObjectFieldConfig{
+			Type: graphql.String,
+		},
+		"department_id": &graphql.InputObjectFieldConfig{
+			Type: graphql.String,
+		},
+		"password": &graphql.InputObjectFieldConfig{
+			Type: graphql.String,
+		},
+	},
+})
 var EmployeeInputType = graphql.NewInputObject(graphql.InputObjectConfig{
 	Name: "EmployeeInputType",
 	Fields: graphql.InputObjectConfigFieldMap{
@@ -28,8 +42,11 @@ var EmployeeInputType = graphql.NewInputObject(graphql.InputObjectConfig{
 		"employee_id": &graphql.InputObjectFieldConfig{
 			Type: graphql.Int,
 		},
-		"department_id": &graphql.InputObjectFieldConfig{
+		"department_ids": &graphql.InputObjectFieldConfig{
 			Type: graphql.NewList(graphql.String),
+		},
+		"logins": &graphql.InputObjectFieldConfig{
+			Type: graphql.NewList(LoginInputType),
 		},
 		"person": &graphql.InputObjectFieldConfig{
 			Type: person.PersonInputType,

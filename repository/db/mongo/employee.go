@@ -2,7 +2,9 @@ package employee
 
 import (
 	"context"
+	"fmt"
 	"reflect"
+	"strings"
 
 	common "github.com/life-entify/employee/common"
 	"github.com/life-entify/employee/errors"
@@ -46,18 +48,92 @@ func (db *MongoDB) GetNextEmployeeId(ctx context.Context) (int64, error) {
 	}
 	return 1, nil
 }
-
-func (db *MongoDB) UpdateEmployee(ctx context.Context, _id primitive.ObjectID, p *employee.Employee) (*mongo.UpdateResult, error) {
+func contains(slice []string, str string) bool {
+	for _, s := range slice {
+		if s == str {
+			return true
+		}
+	}
+	return false
+}
+func (db *MongoDB) UpdateEmployee(ctx context.Context, _id primitive.ObjectID, emp *employee.Employee) (*mongo.UpdateResult, error) {
 	client, coll := db.ConnectEmp()
 	defer MongoDisconnect(client)
-	var update bson.M
-	err := common.ToJSONStruct(p, &update)
-	if err != nil {
-		return nil, err
+	filter := bson.D{primitive.E{Key: "_id", Value: _id}}
+	upsert := true
+	opts := options.UpdateOptions{
+		Upsert: &upsert,
 	}
-	value, err := coll.UpdateOne(ctx, bson.D{{Key: "_id", Value: _id}}, bson.D{{Key: "$set", Value: update}})
+	if !reflect.ValueOf(emp.Logins).IsZero() && len(emp.Logins) > 0 {
+		opts.ArrayFilters = &options.ArrayFilters{
+			Filters: bson.A{bson.M{"x.department_id": emp.Logins[0].DepartmentId}},
+		}
+	}
+	var (
+		setUpdate    = bson.M{}
+		onDateInsert = bson.M{}
+	)
+
+	values := reflect.ValueOf(emp).Elem()
+	fields := values.Type()
+	arrayFields := []string{"logins"}
+	var err error
+	for i := 0; i < values.NumField(); i++ {
+		fieldValue := values.Field(i)
+		fieldTag := strings.Split(fields.Field(i).Tag.Get("json"), ",")[0]
+		if contains(arrayFields, fieldTag) {
+			for j := 0; j < fieldValue.Len(); j++ {
+				arrayObject := fieldValue.Index(j).Elem()
+				arrayObjectType := arrayObject.Type() //struct metadata
+				for k := 0; k < arrayObject.NumField(); k++ {
+					arrayObjectValue := arrayObject.Field(k)
+					arrayObjectField := arrayObjectType.Field(k)
+					if arrayObjectValue.CanInterface() {
+						value := arrayObjectValue.Interface()
+						tag := strings.Split(arrayObjectField.Tag.Get("json"), ",")[0]
+						// check if the value if the whole struct is inital value
+						if reflect.Zero(arrayObjectType).Interface() != value {
+							if tag == "password" {
+								value, err = common.HashPassword(value.(string))
+								if err != nil {
+									return nil, errors.Errorf(err.Error())
+								}
+							}
+							setUpdate[fmt.Sprintf("%s.$[x]."+tag, fieldTag)] = value
+							onDateInsert[tag] = value
+						}
+					}
+				}
+			}
+		} else if fieldTag == "department_ids" {
+
+		} else {
+			if fieldValue.CanInterface() {
+				if reflect.Zero(fieldValue.Type()).Interface() != fieldValue.Interface() {
+					tag := strings.Split(fields.Field(i).Tag.Get("json"), ",")[0]
+					setUpdate[tag] = fieldValue.Interface()
+				}
+			}
+		}
+	}
+	updateData := bson.M{
+		"$set": setUpdate,
+	}
+
+	value, err := coll.UpdateOne(ctx, filter, updateData, &opts)
 	if err != nil {
-		return nil, errors.Errorf(err.Error())
+		if strings.Contains(err.Error(), "The path 'logins' must exist") {
+			_, err1 := coll.UpdateOne(ctx, filter,
+				bson.M{"$set": bson.M{"logins": []interface{}{onDateInsert}}},
+			)
+			if err1 != nil {
+				return nil, errors.Errorf("%s => caused by $s", err1.Error(), err.Error())
+			}
+			value, err = coll.UpdateOne(ctx, filter, updateData, &opts)
+			if err != nil {
+				return nil, errors.Errorf("%s => caused by %s", err.Error(), err.Error())
+			}
+		}
 	}
 	return value, nil
 }

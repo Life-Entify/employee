@@ -39,6 +39,15 @@ func (db *MongoDB) UpdateDepartment(ctx context.Context, _id primitive.ObjectID,
 	}
 	return value, nil
 }
+func (db *MongoDB) DeleteDepartment(ctx context.Context, _id primitive.ObjectID) (*mongo.DeleteResult, error) {
+	client, coll := db.ConnectDept()
+	defer MongoDisconnect(client)
+	value, err := coll.DeleteOne(ctx, bson.D{{Key: "_id", Value: _id}})
+	if err != nil {
+		return nil, errors.Errorf(err.Error())
+	}
+	return value, nil
+}
 func (db *MongoDB) CreateDepartment(ctx context.Context, dept *employee.Department) (*employee.Department, error) {
 	client, coll := db.ConnectDept()
 	defer MongoDisconnect(client)
@@ -111,11 +120,40 @@ func (db *MongoDB) FindDepartments(ctx context.Context, filterObj *employee.Depa
 	if err = cursor.All(context.TODO(), &results); err != nil {
 		return nil, errors.Errorf(err.Error())
 	}
-	var resultDepartments []*employee.Department
-	for _, pt := range results {
-		var resultDepartment employee.Department
-		common.ToJSONStruct(pt, &resultDepartment)
-		resultDepartments = append(resultDepartments, &resultDepartment)
+	if reflect.ValueOf(filterObj).IsZero() && len(results) == 0 {
+		defaultDepts := []employee.Department{
+			{
+				Name:        "Records",
+				Description: "Medical records department",
+				App:         "records",
+			},
+			{
+				Name:        "Accounts",
+				Description: "Account Department for finance functions",
+				App:         "accounts",
+			},
+			{
+				Name:        "HR",
+				Description: "Human resource management department",
+				App:         "accounts",
+			},
+		}
+		var depts []interface{}
+		common.ToJSONStruct(defaultDepts, &depts)
+		_, err := coll.InsertMany(ctx, depts)
+		if err != nil {
+			return nil, errors.Errorf(err.Error())
+		}
+		cursor, err = coll.Find(ctx, filter, option)
+		if err != nil {
+			return nil, errors.Errorf(err.Error())
+		}
+		defer cursor.Close(ctx)
+		if err = cursor.All(context.TODO(), &results); err != nil {
+			return nil, errors.Errorf(err.Error())
+		}
 	}
+	var resultDepartments []*employee.Department
+	common.ToJSONStruct(results, &resultDepartments)
 	return resultDepartments, nil
 }

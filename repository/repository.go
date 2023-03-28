@@ -13,6 +13,7 @@ type Repository interface {
 	ConnectDept() (*mongo.Client, *mongo.Collection)
 	ConnectEmp() (*mongo.Client, *mongo.Collection)
 
+	DeleteDepartment(ctx context.Context, _id primitive.ObjectID) (*mongo.DeleteResult, error)
 	FindDepartmentById(ctx context.Context, id primitive.ObjectID) (*employee.Department, error)
 	FindDepartments(ctx context.Context, filterObj *employee.Department, page *db.Pagination) ([]*employee.Department, error)
 	UpdateDepartment(ctx context.Context, _id primitive.ObjectID, p *employee.Department) (*mongo.UpdateResult, error)
