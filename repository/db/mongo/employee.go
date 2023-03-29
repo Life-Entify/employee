@@ -106,7 +106,10 @@ func (db *MongoDB) UpdateEmployee(ctx context.Context, _id primitive.ObjectID, e
 				}
 			}
 		} else if fieldTag == "department_ids" {
-
+			tag := strings.Split(fields.Field(i).Tag.Get("json"), ",")[0]
+			if !reflect.ValueOf(emp.DepartmentIds).IsZero() {
+				setUpdate[tag] = fieldValue.Interface()
+			}
 		} else {
 			if fieldValue.CanInterface() {
 				if reflect.Zero(fieldValue.Type()).Interface() != fieldValue.Interface() {

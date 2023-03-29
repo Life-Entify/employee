@@ -25,11 +25,14 @@ var EmployeeType = graphql.NewObject(graphql.ObjectConfig{
 		"_id": &graphql.Field{
 			Type: graphql.String,
 		},
+		"status": &graphql.Field{
+			Type: graphql.String,
+		},
 		"employee_id": &graphql.Field{
 			Type: graphql.Int,
 		},
 		"department_ids": &graphql.Field{
-			Type: graphql.NewList(graphql.Int),
+			Type: graphql.NewList(graphql.String),
 		},
 		"logins": &graphql.Field{
 			Type: graphql.NewList(LoginType),

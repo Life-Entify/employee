@@ -39,6 +39,9 @@ var EmployeeInputType = graphql.NewInputObject(graphql.InputObjectConfig{
 		"_id": &graphql.InputObjectFieldConfig{
 			Type: graphql.String,
 		},
+		"status": &graphql.InputObjectFieldConfig{
+			Type: graphql.String,
+		},
 		"employee_id": &graphql.InputObjectFieldConfig{
 			Type: graphql.Int,
 		},
