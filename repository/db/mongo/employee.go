@@ -56,6 +56,64 @@ func contains(slice []string, str string) bool {
 	}
 	return false
 }
+func (db *MongoDB) AddEmpDepartment(ctx context.Context, _id primitive.ObjectID, deptId string, login *employee.Login) (*employee.Employee, error) {
+	client, coll := db.ConnectEmp()
+	defer MongoDisconnect(client)
+
+	var loginInterface interface{}
+	common.ToJSONStruct(login, &loginInterface)
+	filter := bson.M{"_id": _id}
+	update := bson.M{
+		"$push": bson.M{
+			"department_ids": deptId,
+			"logins":         loginInterface,
+		},
+	}
+
+	_, err := coll.UpdateOne(ctx, filter, update)
+	if err != nil {
+		return nil, errors.Errorf(err.Error())
+	}
+	var (
+		result bson.M
+		newEmp employee.Employee
+	)
+	err = coll.FindOne(ctx, bson.M{"_id": _id}).Decode(&result)
+	if err != nil {
+		return nil, errors.Errorf(err.Error())
+	}
+	common.ToJSONStruct(result, &newEmp)
+	return &newEmp, nil
+}
+func (db *MongoDB) DeleteEmpDepartment(ctx context.Context, _id primitive.ObjectID, deptId string) (*employee.Employee, error) {
+	client, coll := db.ConnectEmp()
+	defer MongoDisconnect(client)
+
+	filter := bson.M{"_id": _id}
+	update := bson.M{
+		"$pull": bson.M{
+			"department_ids": deptId,
+			"logins": bson.M{
+				"department_id": deptId,
+			},
+		},
+	}
+
+	_, err := coll.UpdateOne(ctx, filter, update)
+	if err != nil {
+		return nil, errors.Errorf(err.Error())
+	}
+	var (
+		result bson.M
+		newEmp employee.Employee
+	)
+	err = coll.FindOne(ctx, bson.M{"_id": _id}).Decode(&result)
+	if err != nil {
+		return nil, errors.Errorf(err.Error())
+	}
+	common.ToJSONStruct(result, &newEmp)
+	return &newEmp, nil
+}
 func (db *MongoDB) UpdateEmployee(ctx context.Context, _id primitive.ObjectID, emp *employee.Employee) (*mongo.UpdateResult, error) {
 	client, coll := db.ConnectEmp()
 	defer MongoDisconnect(client)

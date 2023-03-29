@@ -66,6 +66,39 @@ func CreateEmployee(resolver graphql.FieldResolveFn) *graphql.Field {
 		Resolve: resolver,
 	}
 }
+func AddEmpDepartment(resolver graphql.FieldResolveFn) *graphql.Field {
+	return &graphql.Field{
+		Description: "Add Employee Department",
+		Type:        emp_schemas.EmployeeType,
+		Args: graphql.FieldConfigArgument{
+			"_id": &graphql.ArgumentConfig{
+				Type: graphql.String,
+			},
+			"department_id": &graphql.ArgumentConfig{
+				Type: graphql.String,
+			},
+			"login": &graphql.ArgumentConfig{
+				Type: emp_schemas.LoginInputType,
+			},
+		},
+		Resolve: resolver,
+	}
+}
+func DeleteEmpDepartment(resolver graphql.FieldResolveFn) *graphql.Field {
+	return &graphql.Field{
+		Description: "Delete Employee Department",
+		Type:        emp_schemas.EmployeeType,
+		Args: graphql.FieldConfigArgument{
+			"_id": &graphql.ArgumentConfig{
+				Type: graphql.String,
+			},
+			"department_id": &graphql.ArgumentConfig{
+				Type: graphql.String,
+			},
+		},
+		Resolve: resolver,
+	}
+}
 func UpdateEmployeeProfile(resolver graphql.FieldResolveFn) *graphql.Field {
 	return &graphql.Field{
 		Description: "Update Employee",

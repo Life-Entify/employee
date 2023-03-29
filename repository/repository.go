@@ -19,6 +19,8 @@ type Repository interface {
 	UpdateDepartment(ctx context.Context, _id primitive.ObjectID, p *employee.Department) (*mongo.UpdateResult, error)
 	CreateDepartment(ctx context.Context, dept *employee.Department) (*employee.Department, error)
 
+	AddEmpDepartment(ctx context.Context, _id primitive.ObjectID, deptId string, login *employee.Login) (*employee.Employee, error)
+	DeleteEmpDepartment(ctx context.Context, _id primitive.ObjectID, deptId string) (*employee.Employee, error)
 	UpdateEmployee(ctx context.Context, _id primitive.ObjectID, p *employee.Employee) (*mongo.UpdateResult, error)
 	CreateEmployee(ctx context.Context, employee *employee.Employee) (*employee.Employee, error)
 	FindEmployeeById(ctx context.Context, id primitive.ObjectID) (*employee.Employee, error)
