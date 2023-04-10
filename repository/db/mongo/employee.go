@@ -237,6 +237,29 @@ func (db *MongoDB) FindEmployeeById(ctx context.Context, id primitive.ObjectID) 
 	common.ToJSONStruct(result, &newEmployee)
 	return &newEmployee, nil
 }
+func (db *MongoDB) FindEmployeesByEmployeeId(ctx context.Context, ids []int64) ([]*employee.Employee, error) {
+	client, coll := db.ConnectEmp()
+	defer MongoDisconnect(client)
+	opts := options.Find().SetSort(bson.D{{Key: "employee_id", Value: 1}})
+	filter := bson.D{{Key: "employee_id", Value: bson.D{{Key: "$in", Value: ids}}}}
+
+	cursor, err := coll.Find(ctx, filter, opts)
+	if err != nil {
+		return nil, err
+	}
+	defer cursor.Close(ctx)
+	var results []bson.M
+	if err = cursor.All(context.TODO(), &results); err != nil {
+		return nil, errors.Errorf(err.Error())
+	}
+	var resultEmployees []*employee.Employee
+	for _, pt := range results {
+		var resultEmployee employee.Employee
+		common.ToJSONStruct(pt, &resultEmployee)
+		resultEmployees = append(resultEmployees, &resultEmployee)
+	}
+	return resultEmployees, nil
+}
 func (db *MongoDB) FindEmployeesByPersonId(ctx context.Context, ids []int64) ([]*employee.Employee, error) {
 	client, coll := db.ConnectEmp()
 	defer MongoDisconnect(client)

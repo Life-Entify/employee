@@ -6,6 +6,18 @@ import (
 	schemas "github.com/life-entify/person/v1/graph/schemas"
 )
 
+func GetEmployeesByEmployeeId(resolver graphql.FieldResolveFn) *graphql.Field {
+	return &graphql.Field{
+		Description: "Get Employees By Employee IDs",
+		Type:        graphql.NewList(emp_schemas.EmployeeType),
+		Args: graphql.FieldConfigArgument{
+			"ids": &graphql.ArgumentConfig{
+				Type: graphql.NewList(graphql.Int),
+			},
+		},
+		Resolve: resolver,
+	}
+}
 func GetEmployees(resolver graphql.FieldResolveFn) *graphql.Field {
 	return &graphql.Field{
 		Description: "Get Employees",
