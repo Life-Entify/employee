@@ -237,15 +237,18 @@ func (db *MongoDB) FindEmployeeById(ctx context.Context, id primitive.ObjectID) 
 	common.ToJSONStruct(result, &newEmployee)
 	return &newEmployee, nil
 }
-func (db *MongoDB) FindEmployeesByEmployeeId(ctx context.Context, ids []int64) ([]*employee.Employee, error) {
+func (db *MongoDB) FindEmployeesByEmployeeId(ctx context.Context, ids []int64, projection *bson.D) ([]*employee.Employee, error) {
 	client, coll := db.ConnectEmp()
 	defer MongoDisconnect(client)
 	opts := options.Find().SetSort(bson.D{{Key: "employee_id", Value: 1}})
+	if projection != nil {
+		opts.SetProjection(projection)
+	}
 	filter := bson.D{{Key: "employee_id", Value: bson.D{{Key: "$in", Value: ids}}}}
 
 	cursor, err := coll.Find(ctx, filter, opts)
 	if err != nil {
-		return nil, err
+		return nil, errors.Errorf(err.Error())
 	}
 	defer cursor.Close(ctx)
 	var results []bson.M
@@ -260,10 +263,10 @@ func (db *MongoDB) FindEmployeesByEmployeeId(ctx context.Context, ids []int64) (
 	}
 	return resultEmployees, nil
 }
-func (db *MongoDB) FindEmployeesByPersonId(ctx context.Context, ids []int64) ([]*employee.Employee, error) {
+func (db *MongoDB) FindEmployeesByPersonId(ctx context.Context, ids []int64, projection *bson.D) ([]*employee.Employee, error) {
 	client, coll := db.ConnectEmp()
 	defer MongoDisconnect(client)
-	opts := options.Find().SetSort(bson.D{{Key: "person_id", Value: 1}})
+	opts := options.Find().SetSort(bson.D{{Key: "person_id", Value: 1}}).SetProjection(projection)
 	filter := bson.D{{Key: "person_id", Value: bson.D{{Key: "$in", Value: ids}}}}
 
 	cursor, err := coll.Find(ctx, filter, opts)
