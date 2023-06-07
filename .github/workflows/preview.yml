@@ -27,6 +27,7 @@ jobs:
           git add .
           git commit -m "update from $GITHUB_REPOSITORY"
           git branch
+          pwd
 
       - name: Set Specific Origin For New Branch and Push
         run: |
